@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL-to-NLP — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- Hero panel -->
+  <div class="auth-hero">
+    <div class="hero-content">
+      <div class="hero-logo">
+        <div class="hero-logo-icon">💬</div>
+        <span class="hero-logo-name">SQL-to-NLP</span>
+      </div>
+      <h1 class="hero-tagline">Talk to your data<br>in <span>plain English</span></h1>
+      <p class="hero-desc">
+        Ask questions naturally, get SQL-powered answers instantly,
+        and export insights to PDF, Word, or PowerPoint.
+      </p>
+      <div class="hero-features">
+        <div class="hero-feature"><div class="hero-feature-dot"></div>Natural language → SQL, automatically</div>
+        <div class="hero-feature"><div class="hero-feature-dot"></div>Powered by Groq (llama-3.3-70b)</div>
+        <div class="hero-feature"><div class="hero-feature-dot"></div>Export summaries to PDF, Word, PPT</div>
+        <div class="hero-feature"><div class="hero-feature-dot"></div>Per-user token quotas &amp; session history</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form panel -->
+  <div class="auth-form-panel">
+    <div class="auth-card">
+      <h1 class="auth-card-title">Welcome back</h1>
+      <p class="auth-card-sub">Sign in to continue to your workspace</p>
+
+      <!-- Login form -->
+      <form id="panel-login" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="login-username">Username</label>
+          <input class="input" id="login-username" type="text" placeholder="your_username" autocomplete="username" required>
+          <span class="form-error" id="login-username-err"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input class="input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          <span class="form-error" id="login-password-err"></span>
+        </div>
+        <button class="btn btn-primary btn-auth" id="login-btn" type="submit">
+          Sign In
+        </button>
+      </form>
+
+      <div id="toast-container"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { handleLogin, isLoggedIn } from './js/auth.js';
+  import { showToast } from './js/toast.js';
+
+  // Redirect if already logged in
+  if (isLoggedIn()) window.location.href = '/chat.html';
+
+  // ── Login submit ─────────────────────────────────────────────────────
+  document.getElementById('panel-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!username || !password) { showToast('Please fill in all fields', 'error'); return; }
+
+    const btn = document.getElementById('login-btn');
+    await handleLogin(username, password, (loading) => {
+      btn.disabled = loading;
+      btn.innerHTML = loading
+        ? '<span class="spinner"></span> Signing in…'
+        : 'Sign In';
+    });
+  });
+</script>
+</body>
+</html>
