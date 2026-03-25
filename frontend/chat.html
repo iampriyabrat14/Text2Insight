@@ -29,7 +29,23 @@
       New Chat
     </button>
 
-    <p class="sidebar-section-title">Chats</p>
+    <!-- Sidebar tabs — Analytics only shown for admins -->
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab sidebar-tab--active" id="tab-chats">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Chats
+      </button>
+      <a href="/analytics" class="sidebar-tab" id="tab-analytics" style="display:none">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 3v18"/><path d="M7 14l3-3 3 3 4-4"/>
+        </svg>
+        Analytics
+      </a>
+    </div>
+
     <div class="session-list" id="session-list"></div>
 
     <div class="sidebar-footer">
@@ -126,6 +142,12 @@
   // Guard — redirect if not logged in
   if (!requireAuth()) throw new Error('redirect');
 
+  // ── Show analytics tab immediately from cached user (synchronous) ────
+  const _cachedUser = getUser();
+  if (_cachedUser?.tier === 'admin') {
+    document.getElementById('tab-analytics').style.display = 'flex';
+  }
+
   // ── Populate user info ───────────────────────────────────────────────
   async function loadUser() {
     try {
@@ -145,6 +167,11 @@
       };
       document.getElementById('user-avatar').style.background =
         tierColours[data.tier] || '#3b82f6';
+
+      // Re-apply in case cache was stale
+      if (data.tier === 'admin') {
+        document.getElementById('tab-analytics').style.display = 'flex';
+      }
 
       // Update quota bar from /me response
       if (data.quota) {

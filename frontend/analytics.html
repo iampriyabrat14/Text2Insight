@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics — Text2Insight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/analytics.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="dash-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <aside class="dash-sidebar">
+    <div class="dash-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3
+                 M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12
+                 M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
+      </svg>
+      Text2Insight
+    </div>
+
+    <nav class="dash-nav">
+      <a href="/chat" class="dash-nav-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Back to Chat
+      </a>
+      <a href="/analytics" class="dash-nav-link active" aria-current="page">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 3v18"/>
+          <path d="M7 14l3-3 3 3 4-4"/>
+        </svg>
+        Analytics
+      </a>
+    </nav>
+
+    <div class="dash-sidebar-footer">
+      <div class="dash-user">
+        <div class="dash-user-avatar" id="dash-avatar">A</div>
+        <div>
+          <div class="dash-user-name" id="dash-username">Admin</div>
+          <div class="dash-user-tier" id="dash-tier">admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────────────────── -->
+  <main class="dash-main">
+
+    <!-- Header -->
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-title">Query Analytics</h1>
+        <p class="dash-subtitle">Observability &amp; performance metrics</p>
+      </div>
+      <div class="dash-header-right">
+        <select class="dash-period-select" id="period-select">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+        <button class="dash-refresh-btn" id="refresh-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card skeleton" id="kpi-total"></div>
+      <div class="kpi-card skeleton" id="kpi-latency"></div>
+      <div class="kpi-card skeleton" id="kpi-cache"></div>
+      <div class="kpi-card skeleton" id="kpi-valid"></div>
+      <div class="kpi-card skeleton" id="kpi-tokens"></div>
+      <div class="kpi-card skeleton" id="kpi-llm"></div>
+    </div>
+
+    <!-- Charts row 1: volume (wide) + provider donut (narrow) -->
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Daily Query Volume</span>
+          <span class="chart-card-sub" id="vol-sub"></span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart-volume"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">LLM Provider Split</span>
+          <span class="chart-card-sub">groq · openai · cache</span>
+        </div>
+        <div class="chart-wrap chart-wrap--donut">
+          <canvas id="chart-provider"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row 2: percentiles + hourly -->
+    <div class="chart-grid-2 equal">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Latency Percentiles</span>
+          <span class="chart-card-sub">end-to-end (ms)</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart-latency"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Queries by Hour of Day</span>
+          <span class="chart-card-sub">UTC</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart-hourly"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tables row -->
+    <div class="chart-grid-2 equal">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Top Queries</span>
+          <span class="chart-card-sub">most frequent user messages</span>
+        </div>
+        <div class="table-wrap">
+          <table class="dash-table" id="tbl-queries">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Query</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="3" class="tbl-empty">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">User Activity</span>
+          <span class="chart-card-sub">top users by query volume</span>
+        </div>
+        <div class="table-wrap">
+          <table class="dash-table" id="tbl-users">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Tier</th>
+                <th>Queries</th>
+                <th>Tokens</th>
+                <th>Avg ms</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="5" class="tbl-empty">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <p class="dash-footer">
+      All times UTC &nbsp;·&nbsp; Admin only &nbsp;·&nbsp;
+      Source: <code>query_metrics</code> table
+    </p>
+
+  </main>
+</div>
+
+<script type="module" src="js/analytics.js"></script>
+</body>
+</html>

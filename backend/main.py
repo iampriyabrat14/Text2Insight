@@ -84,14 +84,12 @@ def create_app() -> FastAPI:
     from backend.chat.router import router as chat_router
     from backend.export.router import router as export_router
     from backend.upload.router import router as upload_router
+    from backend.evaluation.eval_router import router as eval_router
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
     app.include_router(chat_router, prefix="/chat", tags=["chat"])
     app.include_router(export_router, prefix="/export", tags=["export"])
     app.include_router(upload_router, prefix="/upload", tags=["upload"])
-
-    # Routers registered as each module is implemented:
-    # from backend.evaluation.eval_router import router as eval_router
-    # app.include_router(eval_router, prefix="/eval", tags=["eval"])
+    app.include_router(eval_router, prefix="/eval", tags=["eval"])
 
     @app.get("/health", tags=["health"])
     async def health():
@@ -120,6 +118,10 @@ def create_app() -> FastAPI:
         @app.get("/chat", include_in_schema=False)
         async def chat_page():
             return FileResponse(str(frontend_dir / "chat.html"))
+
+        @app.get("/analytics", include_in_schema=False)
+        async def analytics_page():
+            return FileResponse(str(frontend_dir / "analytics.html"))
 
         app.mount("/", StaticFiles(directory=str(frontend_dir)), name="static")
 

@@ -137,6 +137,45 @@
   color: #334155; font-size: .8rem; line-height: 1.7;
 }
 
+/* ── Sidebar tabs (Chats / Analytics) ────────────────────────────────── */
+.sidebar-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--sidebar-text);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.sidebar-tab:hover {
+  background: var(--sidebar-hover);
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,.06);
+}
+.sidebar-tab--active {
+  background: var(--sidebar-active);
+  color: var(--sidebar-active-t);
+  border-color: rgba(59,130,246,.25);
+}
+
 /* Sidebar footer */
 .sidebar-footer {
   border-top: 1px solid var(--sidebar-border);
