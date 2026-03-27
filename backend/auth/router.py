@@ -14,9 +14,22 @@ from backend.database.sqlite_manager import User
 router = APIRouter()
 
 
-@router.post("/register", status_code=status.HTTP_403_FORBIDDEN)
-async def register():
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Registration is disabled")
+@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=schemas.TokenResponse)
+async def register(body: schemas.RegisterRequest, db: AsyncSession = Depends(get_db)):
+    try:
+        user = await service.create_user(db, body.username, body.email, body.password, body.tier)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username or email already registered")
+
+    access_token, expires_in = service.create_access_token(user.id, user.username, user.tier)
+    refresh_token = service.create_refresh_token_value()
+    await service.store_refresh_token(db, user.id, refresh_token)
+
+    return schemas.TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_in=expires_in,
+    )
 
 
 @router.post("/login", response_model=schemas.TokenResponse)

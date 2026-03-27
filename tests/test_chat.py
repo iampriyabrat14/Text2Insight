@@ -112,7 +112,7 @@ async def test_query_requires_auth(client: AsyncClient):
     assert r.status_code == 403
 
 
-async def test_query_bad_sql_raises_error(client: AsyncClient):
+async def test_query_bad_sql_returns_friendly_message(client: AsyncClient):
     token = await _register_and_login(client, "quser5")
     bad_resp = LLMResponse(content="DELETE FROM orders", tokens_used=10, provider="groq", latency_ms=100)
     with patch("backend.llm.nl_to_sql.llm_chat", new_callable=AsyncMock, return_value=bad_resp):
@@ -121,7 +121,11 @@ async def test_query_bad_sql_raises_error(client: AsyncClient):
             json={"query": "delete all my orders"},
             headers={"Authorization": f"Bearer {token}"},
         )
-    assert r.status_code == 400
+    # Service catches SQL validation errors and returns a friendly 200 response
+    assert r.status_code == 200
+    data = r.json()
+    assert "session_id" in data
+    assert data["generated_sql"] == ""
 
 
 # ---------------------------------------------------------------------------
